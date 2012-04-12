@@ -61,7 +61,7 @@ private:
 	void ParseRelationAndAttribute(struct Operand *op, string &relation,
 				       string &attribute);
 
-	bool CheckIndependence (struct AndList *parseTree); //Checks for the presence of independent ors
+	bool CheckIndependence (struct OrList *parseTree); //Checks for the presence of independent ors
 };
 
 #endif

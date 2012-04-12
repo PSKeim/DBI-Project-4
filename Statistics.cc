@@ -109,7 +109,7 @@ void Statistics::Read(char *fromWhere) {
 
         // If the first line is a newline, continue to the
 	// next line
-      if (line.compare("\n") == 0){
+      if (line.compare("") == 0){
 	getline(reader, line);
       }
 
@@ -117,7 +117,8 @@ void Statistics::Read(char *fromWhere) {
       relation = line;
 
 	// Read in the statistics for this relation
-      reader >> stats;
+     reader >> stats; //This doesn't work so well. The stream doesn't react well to this.
+	//What can we do instead? Package up a string containing the atts/#indiv and go with that
 
 	// Store the data
       relations[relation] = stats;
@@ -230,7 +231,9 @@ double Statistics::Estimate(struct AndList *parseTree, RelationSet toEstimate,
 */
     // If the given set can be found in the existing sets, create an estimate
   if (CheckSets(toEstimate, indexes)) {
+    cout << "Inside internal estimate" << endl;
     estimate = GenerateEstimate(parseTree);
+   cout << "After internal estimate, estimate is " << estimate << endl;
   }
 
   return estimate;
@@ -554,22 +557,20 @@ bool Statistics::CheckIndependence (struct OrList *parseTree){
 	//Independent:  Attributes in list are different.
 	//Dependent: Attributes in list are the same
   struct OrList *curOr = parseTree;
-  struct ComparisonOp *curOp;
+ // struct ComparisonOp *curOp;
   char *lName = NULL;
   vector<char *> checkVec;
 
   while (curOr){
 	//When inside an OR, we want to start keeping track of what we see.  If we find an attribute that's not the same ,we need to mark that or list as dependent
-	//not sure how Nick wants me to mark the specific or list, for now we just say that it's false and bail 
-	prevSeen.clear(); //
 	
 	if(lName == NULL){
-		lName = curOr->left->value;
+		lName = curOr->left->left->value;
 		checkVec.push_back(lName);
 	}
 	else{
-		if(curOr->left->value != checkVec[0]){
-			lName = curOr->left->value;
+		if(curOr->left->left->value != checkVec[0]){
+			lName = curOr->left->left->value;
 			checkVec.push_back(lName);	
 		}
 	}
