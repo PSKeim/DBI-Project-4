@@ -1,10 +1,10 @@
 *****************************************************************
 
-DBI Project 3
+DBI Project 4-1
 
 @author Nick Antonelli 5113-5181
 @author Paul Keim 3914-6848
-@revision Wednesday, March 28, 2012
+@revision Monday, April 16, 2012
 
 *****************************************************************
 
@@ -12,36 +12,20 @@ DBI Project 3
 Files Included in GZIP
 =================================================================
 
-All the files from Submission 2-2 are included, with the
+All the files from Submission 3 are included, with the
 following changes.
 
 The following classes were added:
 
-* DuplicateRemoval.h
-* DuplicateRemoval.cc
-* GroupBy.h
-* GroupBy.cc
-* Join.h
-* Join.cc
-* SelectFile.h
-* SelectFile.cc
-* SelectPipe.h
-* SelectPipe.cc
-* a1.h
-* a1.cc
-* a21.h
-* a21.cc
-* a22.h
-* a22.cc
-* a3test.h
-* a3test.cc
+* RelationStatistics.h
+* RelationStatistics.cc
+* a41.cc
+* a41test.h
+* a41test.cc
 
 The following files were modified:
 
-* Record.h
-* Record.cc
-* RelOp.h
-* RelOp.cc
+* Lexer.l
 
 =================================================================
 Compilation Notes
@@ -49,7 +33,7 @@ Compilation Notes
 
 1. Please be sure to make sure that the directories are
    properly set, otherwise the program will throw at least one
-   errors!
+   error!
 
 2. To make prior submissions, type "make a#.out", where #
    is the project number. Example: to make Project A21, type
@@ -58,7 +42,7 @@ Compilation Notes
 3. The main program for this submission can be made by calling
    "make"
 
-4. The program name is a3.out.
+4. The program name is a41.out. To compile, type 'make a41.out'.
 
 
 =================================================================

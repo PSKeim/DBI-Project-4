@@ -7,6 +7,7 @@
 
 using std::map;
 using std::set;
+using std::cout;
 using std::endl;
 using std::string;
 using std::ostream;
@@ -49,6 +50,7 @@ ostream& operator<< (ostream& os, RelationStats &stats){
   map<string,int>::iterator iter = stats.attributes.begin();
   map<string,int>::iterator end = stats.attributes.end();
 
+  os << stats.numRows << endl;
   os << stats.attributes.size() << endl;
 
   for (; iter != end; iter++){
@@ -65,6 +67,17 @@ istream& operator>> (istream& is, RelationStats &stats){
 
   string line;
   std::stringstream s("");
+
+    // Get the first line and put into the stringstream
+  getline(is, line);
+  s.str(line);
+
+    // Read in an integer
+  if (!(s >> stats.numRows)){
+    stats.numRows = 0;
+  }
+  s.clear();
+  s.str("");
 
     // Get the first line and put into the stringstream
   getline(is, line);
@@ -133,11 +146,12 @@ int RelationStats::GetNumRows (){
 
 
 RelationSet::RelationSet () {
-
+  numTuples = -1.0;
 }
 
 RelationSet::RelationSet (string relation) {
   joined.insert(relation);
+  numTuples = -1.0;
 }
 
 
@@ -147,6 +161,14 @@ RelationSet::~RelationSet () {
 
 void RelationSet::AddRelationToSet (string relation){
   joined.insert(relation);
+}
+
+void RelationSet::UpdateNumTuples (double _numTuples){
+  numTuples = _numTuples;
+}
+
+double RelationSet::GetNumTuples (){
+  return numTuples;
 }
 
 int RelationSet::Intersect (RelationSet rs){
@@ -194,13 +216,88 @@ int RelationSet::Size (){
   return joined.size();
 }
 
+ostream& operator<< (ostream& os, RelationSet &set){
+
+  std::set<string>::iterator iter = set.joined.begin();
+
+  os << set.numTuples << endl;
+  os << set.joined.size() << endl;
+
+  for (; iter != set.joined.end(); iter++){
+    os << *iter << endl;
+  } // end for it
+
+  return os;
+
+}
+
+istream& operator>> (istream& is, RelationSet &set){
+
+  string line;
+  std::stringstream s;
+
+  double numTuples = 0;
+  int numRelations = 0;
+
+    // Get the number of tuples
+  getline(is, line);
+  s.str(line);
+
+  if (!(s >> numTuples)){
+    numTuples = 0.0;
+  }
+  s.str("");
+  s.clear();
+
+  set.UpdateNumTuples(numTuples);
+
+    // Get the number of relations in the set
+  getline(is, line);
+  s.str(line);
+
+  if (!(s >> numRelations)){
+    numRelations = 0;
+  }
+  s.str("");
+  s.clear();
+
+    // Read in the relations that are joined
+  for (int i = 0; i < numRelations; i++){
+    getline(is, line);
+    set.joined.insert(line);
+  }
+
+  return is;
+
+}
+
+void RelationSet::GetRelations (std::vector<string> &sets){
+
+  set<string>::iterator iter = joined.begin();
+
+  for (; iter != joined.end(); iter++){
+    sets.push_back(*iter);
+  }
+
+}
+
 RelationSet& RelationSet::operator= (RelationSet &rs){
 
   if (this != &rs){
-    this->joined.clear();
+    this->numTuples = rs.numTuples;
     this->joined = rs.joined;
   }
 
   return *this;
+
+}
+
+void RelationSet::PrintRelations(){
+
+  set<string>::iterator iter = joined.begin();
+
+  for (; iter != joined.end(); iter++){
+    cout << *iter << endl;
+  }
 
 }

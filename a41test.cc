@@ -50,4 +50,24 @@ int main(int argc, char **argv){
 
   cout << stats3 << endl;
 
+  RelationSet set1, set2;
+
+  set1.AddRelationToSet("rel1");
+  set1.AddRelationToSet("rel2");
+  set1.AddRelationToSet("rel3");
+  set1.AddRelationToSet("rel4");
+  set1.UpdateNumTuples(100);
+
+  cout << "Testing << operator, set1....\n" << endl;
+  cout << set1 << endl;
+
+  cout << "Testing = operator, set2....\n" << endl;
+  set2 = set1;
+  cout << set2 << endl;
+
+  Statistics s1;
+  s1.AddRel("s1", 15);
+  s1.AddRel("s2", 123);
+  s1.Write("test-write.txt");
+
 }

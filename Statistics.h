@@ -45,23 +45,28 @@ public:
 private:
 
 	map<string,RelationStats> relations;
+	map<string,RelationSet> relSets;
 	vector<RelationSet> sets;
 
 	map<string,string> tables;
 
 	bool Exists(string relation);
 
-	double Estimate (struct AndList *parseTree,
-			RelationSet toEstimate, vector<int> &indexes);
+	double Guess (struct AndList *parseTree, RelationSet toEstimate,
+		      vector<int> &indexes, double joinEstimate);
 
 	bool CheckParseTree (struct AndList *parseTree);
+	double ParseJoin (struct AndList *parseTree);
 	bool CheckSets (RelationSet toEstimate, vector<int> &indexes);
-	double GenerateEstimate (struct AndList *parseTree);
-
+	double GenerateEstimate (struct AndList *parseTree,
+				 double joinEstimate);
+	double GetRelationCount(string relation, double joinEstimate);
 	void ParseRelationAndAttribute(struct Operand *op, string &relation,
 				       string &attribute);
 
-	bool CheckIndependence (struct OrList *parseTree); //Checks for the presence of independent ors
+        bool CheckIndependence (struct OrList *parseTree);
+
+
 };
 
 #endif

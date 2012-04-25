@@ -113,6 +113,7 @@ void q0 (){
 	cnf = "(s_suppkey>1000)";	
 	yy_scan_string(cnf);
 	yyparse();
+
 	double dummy = s1.Estimate(final, relName, 2);
 	if(fabs(dummy*3.0-result) >0.1)
 	{
@@ -195,7 +196,7 @@ void q3 (){
 	Statistics s;
 	char *relName[] = {"supplier","customer","nation"};
 
-	s.Read(fileName);
+//	s.Read(fileName);
 	
 	s.AddRel(relName[0],10000);
 	s.AddAtt(relName[0], "s_nationkey",25);
@@ -320,18 +321,21 @@ void q5 (){
 	s.AddAtt(relName[2], "l_orderkey",1500000);
 	
 
-	char *cnf = "(c_mktsegment = 'BUILDING')  AND (c_custkey = o_custkey)  AND (o_orderdate < '1995-03-1')";
+	char *cnf = "(c_custkey = o_custkey)  AND (c_mktsegment = 'BUILDING') AND (o_orderdate < '1995-03-1')";
 	yy_scan_string(cnf);
 	yyparse();
-	s.Apply(final, relName, 2);
+	//s.Apply(final, relName, 2);
+	double result = s.Estimate(final, relName, 2);
 	
+	
+	cout << "Q5 estimate after apply is " << result << endl;
 	
 	cnf = " (l_orderkey = o_orderkey) ";
 	yy_scan_string(cnf);
 	yyparse();
 
 
-	double result = s.Estimate(final, relName, 3);
+	result = s.Estimate(final, relName, 3);
 
 	if(fabs(result-400081)>0.1)
 		cout<<"error in estimating Q5\n";
@@ -348,7 +352,7 @@ void q6 (){
 	Statistics s;
         char *relName[] = { "partsupp", "supplier", "nation"};
 
-	s.Read(fileName);
+//	s.Read(fileName);
 	
 	s.AddRel(relName[0],800000);
 	s.AddAtt(relName[0], "ps_suppkey",10000);
@@ -388,7 +392,7 @@ void q7(){
 	Statistics s;
         char *relName[] = { "orders", "lineitem"};
 
-	s.Read(fileName);
+//	s.Read(fileName);
 	
 
 	s.AddRel(relName[0],1500000);
@@ -420,7 +424,7 @@ void q8 (){
 	Statistics s;
         char *relName[] = { "part",  "partsupp"};
 
-	s.Read(fileName);
+//	s.Read(fileName);
 	
 	s.AddRel(relName[0],200000);
 	s.AddAtt(relName[0], "p_partkey",200000);
@@ -489,7 +493,7 @@ void q10 (){
 	Statistics s;
         char *relName[] = { "customer", "orders", "lineitem","nation"};
 
-	s.Read(fileName);
+//	s.Read(fileName);
 	
 	s.AddRel(relName[0],150000);
 	s.AddAtt(relName[0], "c_custkey",150000);
@@ -534,11 +538,11 @@ void q11 (){
 	Statistics s;
         char *relName[] = { "part",  "lineitem"};
 
-	s.Read(fileName);
+//	s.Read(fileName);
 	
 	s.AddRel(relName[0],200000);
 	s.AddAtt(relName[0], "p_partkey",200000);
-	s.AddAtt(relName[0], "p_conatiner",40);
+	s.AddAtt(relName[0], "p_container",40);
 
 	s.AddRel(relName[1],6001215);
 	s.AddAtt(relName[1], "l_partkey",200000);
@@ -551,9 +555,10 @@ void q11 (){
 	yyparse();
 	
 	double result = s.Estimate(final, relName,2);
+	clog << "Estimate returned " << result << endl;
 
 	if(fabs(result-21432.9)>0.5)
-		cout<<"error in estimating Q11\n";
+		clog<<"error in estimating Q11\n";
 	s.Apply(final, relName,2);
 	
 	s.Write(fileName);

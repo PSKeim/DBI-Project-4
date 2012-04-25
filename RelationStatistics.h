@@ -3,10 +3,12 @@
 
 #include <map>
 #include <set>
+#include <vector>
 #include <iostream>
 
 using std::map;
 using std::set;
+using std::vector;
 using std::string;
 using std::ostream;
 using std::istream;
@@ -71,10 +73,24 @@ class RelationSet {
 	    // Merge another set with this set
 	  void Merge (RelationSet rs);
 
+	    // Update query count
+	  void UpdateNumTuples (double _numTuples);
+
+	    // Update query count
+	  double GetNumTuples ();
+
+	  void GetRelations (vector<string> &sets);
+
+	    // Overloaded stream operators
+	  friend ostream& operator<< (ostream& os, RelationSet &set);
+	  friend istream& operator>> (istream& is, RelationSet &set);
+
 	  RelationSet& operator= (RelationSet &rs);
+	  void PrintRelations ();
 
  private:
 
+	  double numTuples;
 	  set<string> joined;
 
 };
