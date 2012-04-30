@@ -12,7 +12,8 @@
 
 using std::map;
 using std::set;
-using std::cout;
+using std::clog;
+using std::clog;
 using std::endl;
 using std::vector;
 using std::string;
@@ -253,8 +254,7 @@ void Statistics::Apply(struct AndList *parseTree,
 
     // Create a new RelationSet represented by relNames
   for (int i = 0; i < numToJoin; i++){
-   	//cout << "APPLY IS LOOKING AT " << relNames[i] << " IN THIS LOOP THINGY" << endl;
-	 set.AddRelationToSet(relNames[i]);
+    set.AddRelationToSet(relNames[i]);
   }
 
   double joinEstimate = 0.0;
@@ -291,9 +291,7 @@ void Statistics::Apply(struct AndList *parseTree,
     }
 
     set.UpdateNumTuples(estimate);
-    
-	//cout << "Set updated to " << estimate << " tuples" << endl;
-	sets.push_back(set);
+    sets.push_back(set);
 
     copy.clear();
 
@@ -302,13 +300,10 @@ void Statistics::Apply(struct AndList *parseTree,
 
     for (int i = 0; i < set.Size(); i++){
       relSets[relations[i]] = set;
-	//cout << "relations[i] is " << relations[i] << endl;
-	//cout << "relSets[relations[i]] now has " << set << " tuples" << endl;
     }
 
   } // end if indexes.size()
- 
- //cout << "relSEts[s] has " << relSets["s"] << endl;
+
 }
 
 double Statistics::Estimate(struct AndList *parseTree,
@@ -326,9 +321,13 @@ double Statistics::Estimate(struct AndList *parseTree,
 
   double joinEstimate = 0.0;
   joinEstimate = ParseJoin(parseTree);
-  //cout << "Join Estimate is " << joinEstimate << endl;
+
+  clog << "Join Estimate was " << joinEstimate << endl;
+
     // Get the estimate
   estimate = Guess(parseTree, set, indexes, joinEstimate);
+  //clog << "Guess was " << estimate << endl;
+
   return estimate;
 
 }
@@ -340,14 +339,13 @@ double Statistics::Guess(struct AndList *parseTree, RelationSet toEstimate,
 /*
     // If parse tree has unknown attributes, exit the program
   if (!CheckParseTree(parseTree)){
-    cout << "BAD: attributes in parseTree do not match any given relation!"
+    clog << "BAD: attributes in parseTree do not match any given relation!"
 	 << endl;
     exit(1);
   }
 */
     // If the given set can be found in the existing sets, create an estimate
   if (CheckSets(toEstimate, indexes)) {
-  // cout << "GENERATING ESTIMATE" << endl;
     estimate = GenerateEstimate(parseTree, joinEstimate);
   }
 
@@ -409,10 +407,6 @@ bool Statistics::CheckParseTree(struct AndList *parseTree){
 
       curOr = curAnd->left;
 
-      if (curAnd->left){
-	cout << "(";
-      }
-
 	// Cycle through the ORs
       while (curOr){
 
@@ -422,34 +416,34 @@ bool Statistics::CheckParseTree(struct AndList *parseTree){
 	if (curOp){
 
 	  if (curOp->left){
-	    cout << curOp->left->value;
+	   // clog << curOp->left->value;
 	  }
 
 
 	  switch (curOp->code){
 	    case 1:
-	      cout << " < ";
+	//      clog << " < ";
 	      break;
 
 	    case 2:
-	      cout << " > ";
+	//      clog << " > ";
 	      break;
 
 	    case 3:
-	      cout << " = ";
+	//      clog << " = ";
 	      break;
 
 	  } // end switch curOp->code
 
 	  if (curOp->right){
-	    cout << curOp->right->value;
+	//    clog << curOp->right->value;
 	  }
 
 
 	} // end if curOp
 
 	if (curOr->rightOr){
-	  cout << " OR ";
+	//  clog << " OR ";
 	}
 
 	curOr = curOr->rightOr;
@@ -457,11 +451,11 @@ bool Statistics::CheckParseTree(struct AndList *parseTree){
       } // end while curOr
 
       if (curAnd->left){
-	cout << ")";
+	//clog << ")";
       }
 
       if (curAnd->rightAnd) {
-	cout << " AND ";
+	//clog << " AND ";
       }
 
       curAnd = curAnd->rightAnd;
@@ -517,8 +511,8 @@ double Statistics::ParseJoin(struct AndList *parseTree){
 	      // join algorithm: |A|*|B|* (1/max(v(a),v(b)))
 	    value = GetRelationCount(relation1, dummy) *
 		    GetRelationCount(relation2, dummy);
-		//cout << "r1 " << r1 << " :" << GetRelationCount(relation1, dummy) << endl;
-		//cout << "r2 " << r2 << " :" << GetRelationCount(relation2, dummy) << endl;
+//clog << "r1 " << relation1 << " :" << GetRelationCount(relation1, dummy) << endl;
+//clog << "r2 " << relation2 << " :" << GetRelationCount(relation2, dummy) << endl;
 	    if (r1[attribute1] >= r2[attribute2]){
 	      value /= (double) r1[attribute1];
 	    }
@@ -540,184 +534,23 @@ double Statistics::ParseJoin(struct AndList *parseTree){
 
   } // end if parseTree
 
-  //cout << "Estimate Join returning " << value << endl;
+
   return value;
 
 }
 
-double Statistics::GenerateEstimate(struct AndList *parseTree, double joinEstimate){
-	double estimate = 1.0; //Final estimation storage variable
-	if(joinEstimate > 0){
-		estimate = joinEstimate;
-	}
-	//Traversal Variables
-	struct AndList *curAnd = parseTree;
-  	struct OrList *curOr;
-	struct ComparisonOp *curOp;
 
-  	RelationStats r1;
-	string relation1;
-	string attribute1;
-
-	bool hasJoin = false;
-	long numTups = 0.0l;
-
-	while(curAnd){ //Iterate through the andList
-
-		curOr = curAnd->left;
-
-		bool independentOr = CheckIndependence(curOr);
-		/*if(independentOr){
-			cout << "The or is independent" << endl;
-		}
-		else{
-			cout << "The or is dependent" << endl;
-		}*/
-		bool singleOr = (curOr ->rightOr == NULL);
-		/*if(singleOr){
-			cout << "The or is a single or" << endl;
-		}
-		else{
-			cout << "The or is not a single or" << endl;
-		}*/
-
-		//Temp var to hold result of each or
-		double tempOr = 0.0;
-		if(independentOr) tempOr = 1.0;
-		while(curOr){ //iterate through the orList
-			curOp = curOr->left;
-			Operand *op = curOp->left;
-
-			if (op->code != NAME){ //If the left isn't a name, the right must be
-				op = curOp->right; //I don't think there are any tests that have this happen
-			}
-
-			//Note that we ignore the case of (1=1) or something silly like that. 
-			//What would that mean for injection attacks? Huh
-
-			//What have we got now? we've got the op, and the attribute that it's an op on
-			//So we grab the relation and attribute, because we'll need those
-			ParseRelationAndAttribute(op, relation1, attribute1);
-			r1 = relations[relation1];
-
-			//Now, what are our options?
-			//We can either have an equality, or an inequality
-			//Each of those has 2 different options: Single Or or not
-			//If it is not a single or, it can be dependent or independent
-			//So:
-			if(curOp->code == EQUALS){
-				//cout << "EQUALITY USING " << relation1 << " ON ATTRIBUTE " << attribute1 << endl;
-
-				if(singleOr){
-					//Need to check that it isn't a join
-					if(curOp->right->code == NAME && curOp->left->code == NAME){
-						tempOr = 1.0;
-						hasJoin = true;
-					}
-					else{
-					//	cout << "SINGLE OR" << endl;
-						double const calc = (1.0l / r1[attribute1]);
-					//	cout << "Single value is " << calc << endl;
-						tempOr += calc;					
-					}
-				}//End singleOr
-
-				else{
-
-					if(independentOr){
-					//	cout << "INDEPENDENT OR" << endl;
-						double const calc = 1.0l - (1.0l / r1[attribute1]);
-					//	cout << "Single value is " << calc << endl;
-						tempOr *= calc;	
-					}
-					else{
-						//cout << "DEPENDENT OR" << endl;
-						double const calc = 1.0l / r1[attribute1];
-						//cout << "Single value is " << calc << endl;
-						tempOr += calc;	
-						//cout << "tempOr is now " << tempOr << endl;
-					}
-
-				} //End else
-			}//end code == EQUALS
-
-			else{
-				//cout << "INEQUALITY USING " << relation1 << " ON ATTRIBUTE " << attribute1 << endl;
-				if(singleOr){
-					//cout << "SINGLE OR" << endl;
-					double const calc = 1.0l / 3.0l;
-					//cout << "Single value is " << calc << endl;
-					tempOr += calc;	
-				}
-
-				else{
-					if(independentOr){
-					//	cout << "INDEPENDENT OR" << endl;
-						double const calc = 1.0l - (1.0l / 3.0l);
-					//	cout << "Value is " << calc << endl;
-						tempOr *= calc;	
-					}
-					else{
-					//	cout << "DEPENDENT OR" << endl;
-						double const calc = 1.0l / 3.0l;
-					//	cout << "Value is " << calc << endl;
-						tempOr += calc;	
-					}
-				}
-			}//End Code != EQUALS
-			if(!hasJoin){
-				//cout << "NO JOIN FOUND, SETTING NUMTUPS TO NUM ROWS" << endl;
-				if(relSets[relation1].GetNumTuples() == -1){
-					numTups = r1.GetNumRows();
-				}
-				else{
-					numTups = relSets[relation1].GetNumTuples();
-				}
-				//cout << "NUM TUPS IS " << numTups << endl;
-			}
-			curOr = curOr->rightOr;
-		}
-
-		//At this point, every Or for the current And has been calculated into tempOr, leaving us to get our current result:
-		if(singleOr){
-			//cout << "ADDING SINGLE OR TO CALCULATION" << endl;
-			estimate *= tempOr;
-			//cout << "Calculation is now " << estimate << endl;
-		}
-		else{
-			if(independentOr){
-			//	cout << "ADDING INDEPENDENT OR TO CALCULATION" << endl;
-				estimate *= (1- tempOr);
-			}
-			else{
-			//	cout << "ADDING DEPENDENT OR TO CALCULATION" << endl;
-				estimate *= tempOr;
-			}
-		}
-		curAnd = curAnd->rightAnd;
-	}
-
-	if(!hasJoin){
-		//cout << "FINAL CALCULATING ESTIMATE" << endl;
-		estimate = numTups * estimate;
-		//cout << "ESTIMATE IS " << estimate << endl;
-	}
-	
-	return estimate;
-}
-
-/*
 double Statistics::GenerateEstimate(struct AndList *parseTree,
 		      double joinEstimate){
 
   double estimate = 0.0;
-
+  clog << "Estimate is 0.0" << endl;
   double orEstimate = 0.0;
   double tempOrEstimate = 0.0;
   bool independentOR = false;
 
   int numIterations = 0;
-  cout << "Estimate is now " << estimate << endl;
+
   struct AndList *curAnd = parseTree;
   struct OrList *curOr;
   struct ComparisonOp *curOp;
@@ -739,7 +572,7 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
     if (curOr->rightOr){
 
       tempOrEstimate = 0.0;
-      independentOR = CheckIndependence(curOr);
+      independentOR = CheckIndependence(curOr); //False if the ors are dependent, true if they are independent
 
       if (independentOR){
 	tempOrEstimate = 1.0;
@@ -760,29 +593,39 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
 	ParseRelationAndAttribute(op, relation1, attribute1);
 	r1 = relations[relation1];
 
-	  // OR is not independent
+	  // OR is dependent
 	if (!independentOR){
-
+		clog << "Dependent Or: " << endl;
 	    // selection = algorithm: |R| / v(a)
 	  if (curOp->code == EQUALS){
+	    clog << "Estimating SELECTION: |R| / v(a) on attribute " << curOp->left->value << endl;
+	    clog << "TempOr was " << tempOrEstimate << endl;
+	    clog << "Relation count is " << GetRelationCount(relation1, joinEstimate) << endl;
+	    clog << "V(A) is " << (double) r1[attribute1] << endl;
 	    tempOrEstimate += GetRelationCount(relation1, joinEstimate)
 				/ (double) r1[attribute1];
+	    clog << "TempOr is now " << tempOrEstimate << endl;
 	  }
 
 	    // selection < or > algorithm: |R| / 3
 	  else {
+	    clog << "Estimating SELECTION: |R| / 3" << endl;
+	    clog << "TempOr was " << tempOrEstimate << endl;
 	    tempOrEstimate += GetRelationCount(relation1, joinEstimate) / 3.00;
+	    clog << "TempOr is now " << tempOrEstimate << endl;
 	  }
 	}
 
-	  // OR is independent
+	  //Ors are independent (
 	else {
-
+		clog << "Inependent Or: " << endl;
 	  if (curOp->code == EQUALS){
+	    clog << "Equality SELECTION: 1 - (1 / r1[attribute])" << endl;
 	    tempOrEstimate *= 1.00 - (1.00 / (double) r1[attribute1]);
 	  }
 
 	  else {
+	    clog << "Inequality SELECTION: 1 - (1 / 3)" << endl;
 	    tempOrEstimate *= 1.00 - (1.00 / 3.00);
 	  }
 
@@ -793,12 +636,13 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
 	curOr = curOr->rightOr;
 
       } // end while curOr
-
+     
       if (independentOR){
+	clog << "Adjusting for Independent Orship" << endl;
+	clog << "Going from " << tempOrEstimate;
 	tempOrEstimate = (double) (1.00 - tempOrEstimate);
+        clog << " to " << tempOrEstimate << endl;
       }
-
-      orEstimate = tempOrEstimate;
 
     } // end if curOr->rightOr
 
@@ -807,17 +651,37 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
 
 	// Get the operation
       curOp = curOr->left;
-      cout << "Inside one condition, entering our estimate is " << estimate << endl;
+
 
 	// If both left and right operands are attributes, we have a join!
       if (curOp->left->code == curOp->right->code){
 
 	orEstimate = -1.0;
+	clog << "How did I get here? What is supposed to happen now? NICCCCK!?!" << endl;
+/*
+	  // Get the relation names and the attributes
+	ParseRelationAndAttribute(curOp->left, relation1, attribute1);
+	ParseRelationAndAttribute(curOp->right, relation2, attribute2);
+
+	  // Get the relevant statistics
+	r1 = relations[relation1];
+	r2 = relations[relation2];
+
+	  // join algorithm: |A|*|B|* (1/max(v(a),v(b)))
+	orEstimate = GetRelationCount(relation1) * GetRelationCount(relation2);
+
+	if (r1[attribute1] >= r2[attribute2]){
+	  orEstimate /= (double) r1[attribute1];
+	}
+	else {
+	  orEstimate /= (double) r2[attribute2];
+	}
+*/
       } // end if curOp->left->code
 
 	// Else we are parsing a single OR
       else {
-
+	clog << "Parsing single or" << endl;
         Operand *op = curOp->left;
 
 	if (op->code != NAME){
@@ -830,21 +694,20 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
 
 	  // selection = algorithm: |R| / v(a)
 	if (curOp->code == EQUALS){
-	  cout << "parsing equality selection on " << relation1 << endl;
+	  clog << "SELECTION: |R|/v(a)" << endl;
+	  clog << "Before: " << orEstimate << endl;
 	  orEstimate = GetRelationCount(relation1, joinEstimate)
 			  / (double) r1[attribute1];
-	  cout << "or Estimate should be 1.5mil / 5" << endl;
-          cout << "or Estimate is " << orEstimate << endl;
+	  clog << "After: " << orEstimate << endl;
 	}
 
 	  // selection < or > algorithm: |R| / 3
 	else {
-	  cout << "Parsing inequality on " << relation1 << endl;
-	  //orEstimate = GetRelationCount(relation1, joinEstimate) / 3.00;
-	  orEstimate = estimate/3.00;  
-	cout << "Or estimate should be (1.5mil/5/3)" << endl;
-		cout << "Or estimate is " << orEstimate << endl;
-}
+	  clog << "SELECTION: |R|/3" << endl;
+	  clog << "Before: " << orEstimate << endl;
+	  orEstimate = GetRelationCount(relation1, joinEstimate) / 3.00;
+	  clog << "After: " << orEstimate << endl;
+	}
 
       } // end else
 
@@ -852,10 +715,15 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
 
     if (orEstimate != -1.0){
       if (estimate == 0.0){
+	clog << "ATTN PAUL, LOOK FOR THIS LINE!!!!!!! Setting estimate to orEstimate" << endl;
 	estimate = orEstimate;
       }
       else {
+	clog << "Setting estimate to est * orEst" << endl;
+	clog << "Est: " << estimate << endl;
+	clog << "OrEst: " << orEstimate << endl;
 	estimate *= orEstimate;
+	clog << "New Est: " << estimate << endl;
       }
     }
 
@@ -867,12 +735,13 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
 
   if (numIterations == 1 && estimate == 0.0 && joinEstimate > 0.0){
     estimate = joinEstimate;
+    clog << "Setting estimate as joinEstimate " << estimate << endl;
   }
 
-  cout << "Internal estimate is returning " << estimate << endl;
+  clog << "Estimate at end is " << estimate << endl;
   return estimate;
 
-}*/
+}
 
 double Statistics::GetRelationCount(string relation, double joinEstimate){
 
@@ -881,19 +750,13 @@ double Statistics::GetRelationCount(string relation, double joinEstimate){
   count = joinEstimate;
 
   if (count == 0.0){
-   
-	//cout << "In the 0.0 if conditional" << endl;
-	 count = relSets[relation].GetNumTuples();
-  	//cout << "Count of " << relation << " returned " << relSets[relation].GetNumTuples() << endl;
-	}
+    count = relSets[relation].GetNumTuples();
+  }
 
   if (count == -1.0){
-	//cout << "In the -1 if conditional" << endl;
     count = (double) relations[relation].GetNumRows();
   }
 
-
- // cout << "Get Relation Count is returning " << count << " for relation " << relation << endl;
   return count;
 
 }
@@ -974,11 +837,7 @@ bool Statistics::CheckIndependence (struct OrList *parseTree){
   } // end while curOr
 
    // Dependent will have checkVec size 1, independent will have size > 1
+  clog << "Independence is " << (checkVec.size() > 1) << endl;
   return (checkVec.size() > 1);
 
 }
-/*
-bool Statistics::CheckSingle (struct OrList *parseTree){
-	
-
-}*/

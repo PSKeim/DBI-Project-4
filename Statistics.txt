@@ -1,23 +1,41 @@
+4
+
+customer
+150000
 2
+c_custkey
+150000
+c_nationkey
+25
 
-partsupp
-800000
+lineitem
+6001215
 1
-ps_suppkey
-10000
+l_orderkey
+1500000
 
-supplier
-10000
+nation
+25
 1
-s_suppkey
-10000
+n_nationkey
+25
+
+orders
+1500000
+2
+o_custkey
+150000
+o_orderkey
+1500000
 
 ***
 
 1
 
-800000
-2
-partsupp
-supplier
+2.0004e+06
+4
+customer
+lineitem
+nation
+orders
 

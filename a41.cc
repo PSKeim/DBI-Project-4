@@ -100,20 +100,17 @@ void q0 (){
 	yy_scan_string(cnf);
 	yyparse();
 	double result = s.Estimate(final, relName, 2);
-	cout << "Result is " << result << endl;
 	if(result!=800000)
 		cout<<"error in estimating Q1 before apply \n ";
-	cout << "IGNORE THIS AREA" << endl;
+
 	s.Apply(final, relName, 2);
-	cout << "KEEP IGNORING THE AREA ABOVE " << endl;
+
 	// test write and read
 	s.Write(fileName);
 	
 	//reload the statistics object from file
 	Statistics s1;
 	s1.Read(fileName);	
-	cout << "BEGINNING IMPORTANT SECTION" << endl;
-	cout << "***************************" << endl;
 	cnf = "(s_suppkey>1000)";	
 	yy_scan_string(cnf);
 	yyparse();
@@ -143,7 +140,7 @@ void q1 (){
 	yyparse();
 
 	double result = s.Estimate(final, relName, 1);
-	cout<<"Your estimation Result  " <<result;
+
 	cout<<"\n Correct Answer: 8.5732e+5";
 
 	s.Apply(final, relName, 1);
@@ -281,38 +278,38 @@ void q4 (){
 	yyparse();
 	char *set1[] = {"p","ps"};
 	double result = s.Estimate(final, set1, 2);
-	clog << "Result of first join was estimated to be " << result << endl;
-	/*s.Apply(final, set1, 2);
+	//clog << "Result of first join was estimated to be " << result << endl;
+	s.Apply(final, set1, 2);
 
-	clog << "END FIRST JOIN SECTION" << endl << endl;
+	//clog << "END FIRST JOIN SECTION" << endl << endl;
 
 	cnf ="(s.s_suppkey = ps.ps_suppkey)";
 	yy_scan_string(cnf);
 	yyparse();
-	char *set2[] = {"s", "ps"};
+	char *set2[] = {"s","ps", "p"};
    	result = s.Estimate(final, set2, 3);
 
-	clog << "Result of second join was estimated to be " << result << endl;
+	//clog << "Result of second join was estimated to be " << result << endl;
    
 	s.Apply(final, set2, 3);
 
-	cout << "END SECOND JOIN SECTION" << endl << endl;
+	//cout << "END SECOND JOIN SECTION" << endl << endl;
 	cnf =" (s.s_nationkey = n.n_nationkey)";
 	yy_scan_string(cnf);
 	yyparse();
-	char *set3[] = {"s", "n"};
+	char *set3[] = {"s","n", "ps", "p"};
 	s.Estimate(final, set3, 4);
 	
-	clog << "Result of third join was estimated to be " << result << endl;	
+	//clog << "Result of third join was estimated to be " << result << endl;	
 
 	s.Apply(final, set3, 4);
 
-	clog << "END THIRD JOIN SECTION" << endl << endl;
+	//clog << "END THIRD JOIN SECTION" << endl << endl;
 	
 	cnf ="(n.n_regionkey = r.r_regionkey) AND (r.r_name = 'AMERICA')";
 	yy_scan_string(cnf);
 	yyparse();
-	char *set4[] = {"n", "r"};
+	char *set4[] = {"s", "n", "ps", "p", "r"};
 	//cnf = "(n.n_regionkey = r.r_regionkey)";
 	//yy_scan_string(cnf);
 	//yyparse();
@@ -320,14 +317,14 @@ void q4 (){
 
 	result = s.Estimate(final, set4, 5);
 
-	clog << "Result of final join was estimated to be " << result << endl;
+	//clog << "Result of final join was estimated to be " << result << endl;
 
 	if(fabs(result-3200)>0.1)
 		cout<<"error in estimating Q4\n";
 
 	s.Apply(final, set4, 5);	
 	
-	s.Write(fileName);*/
+	s.Write(fileName);
 }
 
 void q5 (){
@@ -350,11 +347,10 @@ void q5 (){
 	char *cnf = "(c_mktsegment = 'BUILDING') AND (c_custkey = o_custkey)  AND (o_orderdate < '1995-03-1')";
 	yy_scan_string(cnf);
 	yyparse();
-	//s.Apply(final, relName, 2);
 	double result = s.Estimate(final, relName, 2);
+	s.Apply(final, relName, 2);
 	
-	
-	cout << "Q5 estimate after apply is " << result << endl;
+	//cout << "Q5 estimate after apply is " << result << endl;
 	
 	cnf = " (l_orderkey = o_orderkey) ";
 	yy_scan_string(cnf);
@@ -466,8 +462,8 @@ void q8 (){
 	yyparse();
 	
 		
-	double result = s.Estimate(final, relName,2);
-
+	double result = s.Estimate(final, relName, 2);
+	//cout << "Estimate is " << result << endl;
 	if(fabs(result-48000)>0.1)
 		cout<<"error in estimating Q8\n";
 
@@ -581,7 +577,6 @@ void q11 (){
 	yyparse();
 	
 	double result = s.Estimate(final, relName,2);
-	clog << "Estimate returned " << result << endl;
 
 	if(fabs(result-21432.9)>0.5)
 		clog<<"error in estimating Q11\n";
