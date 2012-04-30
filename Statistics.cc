@@ -811,170 +811,37 @@ bool Statistics::CheckIndependence (struct OrList *parseTree){
 
 }
 
-/*
-double Statistics::GenerateEstimate(struct AndList *parseTree,
-		      double joinEstimate){
-
-  double estimate = 0.0;
-
-  double orEstimate = 0.0;
-  double tempOrEstimate = 0.0;
-  bool independentOR = false;
-
-  int numIterations = 0;
-  cout << "Estimate is now " << estimate << endl;
-  struct AndList *curAnd = parseTree;
-  struct OrList *curOr;
-  struct ComparisonOp *curOp;
-
-  string relation1;
-  string attribute1;
-  string relation2;
-  string attribute2;
-  RelationStats r1;
-  RelationStats r2;
-
-    // Cycle through the ANDs
-  while (curAnd){
-
-    curOr = curAnd->left;
-
-    orEstimate = 0.0;
-
-    if (curOr->rightOr){
-
-      tempOrEstimate = 0.0;
-      independentOR = CheckIndependence(curOr);
-
-      if (independentOR){
-	tempOrEstimate = 1.0;
-      }
-
-	// Cycle through the ORs
-      while (curOr){
-
-	curOp = curOr->left;
-
-        Operand *op = curOp->left;
-
-	if (op->code != NAME){
-	  op = curOp->right;
-	}
-
-	  // Get the relation name and the attribute
-	ParseRelationAndAttribute(op, relation1, attribute1);
-	r1 = relations[relation1];
-
-	  // OR is not independent
-	if (!independentOR){
-
-	    // selection = algorithm: |R| / v(a)
-	  if (curOp->code == EQUALS){
-	    tempOrEstimate += GetRelationCount(relation1, joinEstimate)
-				/ (double) r1[attribute1];
-	  }
-
-	    // selection < or > algorithm: |R| / 3
-	  else {
-	    tempOrEstimate += GetRelationCount(relation1, joinEstimate) / 3.00;
-	  }
-	}
-
-	  // OR is independent
-	else {
-
-	  if (curOp->code == EQUALS){
-	    tempOrEstimate *= 1.00 - (1.00 / (double) r1[attribute1]);
-	  }
-
-	  else {
-	    tempOrEstimate *= 1.00 - (1.00 / 3.00);
-	  }
-
-
-	} // end else
-
-
-	curOr = curOr->rightOr;
-
-      } // end while curOr
-
-      if (independentOR){
-	tempOrEstimate = (double) (1.00 - tempOrEstimate);
-      }
-
-      orEstimate = tempOrEstimate;
-
-    } // end if curOr->rightOr
-
-      // Else we have only one condition to deal with
-    else {
-
-	// Get the operation
-      curOp = curOr->left;
-      cout << "Inside one condition, entering our estimate is " << estimate << endl;
-
-	// If both left and right operands are attributes, we have a join!
-      if (curOp->left->code == curOp->right->code){
-
-	orEstimate = -1.0;
-      } // end if curOp->left->code
-
-	// Else we are parsing a single OR
-      else {
-
-        Operand *op = curOp->left;
-
-	if (op->code != NAME){
-	  op = curOp->right;
-	}
-
-	  // Get the relation name and the attribute
-	ParseRelationAndAttribute(op, relation1, attribute1);
-	r1 = relations[relation1];
-
-	  // selection = algorithm: |R| / v(a)
-	if (curOp->code == EQUALS){
-	  cout << "parsing equality selection on " << relation1 << endl;
-	  orEstimate = GetRelationCount(relation1, joinEstimate)
-			  / (double) r1[attribute1];
-	  cout << "or Estimate should be 1.5mil / 5" << endl;
-          cout << "or Estimate is " << orEstimate << endl;
-	}
-
-	  // selection < or > algorithm: |R| / 3
-	else {
-	  cout << "Parsing inequality on " << relation1 << endl;
-	  //orEstimate = GetRelationCount(relation1, joinEstimate) / 3.00;
-	  orEstimate = estimate/3.00;  
-	cout << "Or estimate should be (1.5mil/5/3)" << endl;
-		cout << "Or estimate is " << orEstimate << endl;
+bool Statistics::CheckTableIndependence (struct OrList *parseTree){
+	
+    //Method checks to see if an OrList is dependent upon one (independent) or more (dependent) tables
+	
+	struct OrList *curOr = parseTree;
+	struct ComparisonOp *curOp;
+	string lName;
+	vector<string> checkVec;
+	
+	RelationStats r1;
+	string relation1;
+	string attribute1;
+	
+	while (curOr){
+		
+		//First, we grab the op
+		curOp = curOr->left;
+		
+		ParseRelationAndAttribute(op, relation1, attribute1);
+		if(checkVec.size() == 0){
+			checkVec.push_back(relation1);
+		}
+		else{
+			if(checkVec[0].compare(relation1) != 0){
+				return false;
+			}
+		}
+		
+	} // end while curOr
+	
+	// Dependent will have checkVec size 1, independent will have size > 1
+	return true;
+	
 }
-
-      } // end else
-
-    } // end else
-
-    if (orEstimate != -1.0){
-      if (estimate == 0.0){
-	estimate = orEstimate;
-      }
-      else {
-	estimate *= orEstimate;
-      }
-    }
-
-    curAnd = curAnd->rightAnd;
-
-    numIterations++;
-
-  } // end while curAnd
-
-  if (numIterations == 1 && estimate == 0.0 && joinEstimate > 0.0){
-    estimate = joinEstimate;
-  }
-
-  cout << "Internal estimate is returning " << estimate << endl;
-  return estimate;
-
-}*/
