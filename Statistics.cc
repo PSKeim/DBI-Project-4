@@ -829,7 +829,7 @@ bool Statistics::CheckTableIndependence (struct OrList *parseTree){
 		//First, we grab the op
 		curOp = curOr->left;
 		
-		ParseRelationAndAttribute(op, relation1, attribute1);
+		ParseRelationAndAttribute(curOp->left, relation1, attribute1);
 		if(checkVec.size() == 0){
 			checkVec.push_back(relation1);
 		}

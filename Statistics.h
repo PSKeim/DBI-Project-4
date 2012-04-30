@@ -65,7 +65,7 @@ private:
 				       string &attribute);
 
         bool CheckIndependence (struct OrList *parseTree);
-
+	bool CheckTableIndependence (struct OrList *parseTree);
 
 };
 
