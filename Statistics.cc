@@ -554,13 +554,13 @@ double Statistics::GenerateEstimate(struct AndList *parseTree, double joinEstima
 	struct AndList *curAnd = parseTree;
   	struct OrList *curOr;
 	struct ComparisonOp *curOp;
-
+	//Relation stuff variables
   	RelationStats r1;
 	string relation1;
 	string attribute1;
-
-	bool hasJoin = false;
-	long numTups = 0.0l;
+	//Keeps track of shit! 
+	bool hasJoin = false; //If I've seen a join (technically I could set this to joinEstimate > 0, but I added that in later, so...)
+	long numTups = 0.0l; //Number of tuples in the relationship
 
 	while(curAnd){ //Iterate through the andList
 
@@ -704,6 +704,111 @@ double Statistics::GenerateEstimate(struct AndList *parseTree, double joinEstima
 	}
 	
 	return estimate;
+}
+
+
+double Statistics::GetRelationCount(string relation, double joinEstimate){
+
+  double count = 0.0;
+
+  count = joinEstimate;
+
+  if (count == 0.0){
+   
+	//cout << "In the 0.0 if conditional" << endl;
+	 count = relSets[relation].GetNumTuples();
+  	//cout << "Count of " << relation << " returned " << relSets[relation].GetNumTuples() << endl;
+	}
+
+  if (count == -1.0){
+	//cout << "In the -1 if conditional" << endl;
+    count = (double) relations[relation].GetNumRows();
+  }
+
+
+ // cout << "Get Relation Count is returning " << count << " for relation " << relation << endl;
+  return count;
+
+}
+
+void Statistics::ParseRelationAndAttribute(struct Operand *op,
+		  string &relation, string &attribute) {
+
+    string value(op->value);
+    string rel;
+    stringstream s;
+
+    int i = 0;
+
+    while (value[i] != '_'){
+
+      if (value[i] == '.'){
+	relation = s.str();
+	break;
+      }
+
+      s << value[i];
+
+      i++;
+
+    }
+
+    if (value[i] == '.'){
+      attribute = value.substr(i+1);
+    }
+    else {
+      attribute = value;
+      rel = s.str();
+      relation = tables[rel];
+    }
+
+}
+
+
+bool Statistics::Exists(string relation) {
+  return (relations.find(relation) != relations.end());
+}
+
+
+bool Statistics::CheckIndependence (struct OrList *parseTree){
+
+    // Method checks to see if the ORs in this are independent or not.
+    // Returns false if they are, true if they are not. If all
+    // attributes in list are the same, it is not an independent
+    // or list.
+
+    // Independent: Attributes in list are different.
+    // Dependent: Attributes in list are the same
+
+  struct OrList *curOr = parseTree;
+
+  string lName;
+  vector<string> checkVec;
+
+  while (curOr){
+
+      // When inside an OR, we want to start keeping track of what we
+      // see. If we find an attribute that's not the same, we need to
+      // mark that or list as dependent.
+
+    if (checkVec.size() == 0){
+      lName = curOr->left->left->value;
+      checkVec.push_back(lName);
+    }
+    else{
+      if(checkVec[0].compare(curOr->left->left->value) != 0){
+	lName = curOr->left->left->value;
+	checkVec.push_back(lName);
+      }
+    }
+
+    curOr = curOr->rightOr;
+
+  } // end while curOr
+
+   // Dependent will have checkVec size 1, independent will have size > 1
+  return (checkVec.size() > 1);
+
 }
 
 /*
@@ -871,114 +976,5 @@ double Statistics::GenerateEstimate(struct AndList *parseTree,
 
   cout << "Internal estimate is returning " << estimate << endl;
   return estimate;
-
-}*/
-
-double Statistics::GetRelationCount(string relation, double joinEstimate){
-
-  double count = 0.0;
-
-  count = joinEstimate;
-
-  if (count == 0.0){
-   
-	//cout << "In the 0.0 if conditional" << endl;
-	 count = relSets[relation].GetNumTuples();
-  	//cout << "Count of " << relation << " returned " << relSets[relation].GetNumTuples() << endl;
-	}
-
-  if (count == -1.0){
-	//cout << "In the -1 if conditional" << endl;
-    count = (double) relations[relation].GetNumRows();
-  }
-
-
- // cout << "Get Relation Count is returning " << count << " for relation " << relation << endl;
-  return count;
-
-}
-
-void Statistics::ParseRelationAndAttribute(struct Operand *op,
-		  string &relation, string &attribute) {
-
-    string value(op->value);
-    string rel;
-    stringstream s;
-
-    int i = 0;
-
-    while (value[i] != '_'){
-
-      if (value[i] == '.'){
-	relation = s.str();
-	break;
-      }
-
-      s << value[i];
-
-      i++;
-
-    }
-
-    if (value[i] == '.'){
-      attribute = value.substr(i+1);
-    }
-    else {
-      attribute = value;
-      rel = s.str();
-      relation = tables[rel];
-    }
-
-}
-
-
-bool Statistics::Exists(string relation) {
-  return (relations.find(relation) != relations.end());
-}
-
-
-bool Statistics::CheckIndependence (struct OrList *parseTree){
-
-    // Method checks to see if the ORs in this are independent or not.
-    // Returns false if they are, true if they are not. If all
-    // attributes in list are the same, it is not an independent
-    // or list.
-
-    // Independent: Attributes in list are different.
-    // Dependent: Attributes in list are the same
-
-  struct OrList *curOr = parseTree;
-
-  string lName;
-  vector<string> checkVec;
-
-  while (curOr){
-
-      // When inside an OR, we want to start keeping track of what we
-      // see. If we find an attribute that's not the same, we need to
-      // mark that or list as dependent.
-
-    if (checkVec.size() == 0){
-      lName = curOr->left->left->value;
-      checkVec.push_back(lName);
-    }
-    else{
-      if(checkVec[0].compare(curOr->left->left->value) != 0){
-	lName = curOr->left->left->value;
-	checkVec.push_back(lName);
-      }
-    }
-
-    curOr = curOr->rightOr;
-
-  } // end while curOr
-
-   // Dependent will have checkVec size 1, independent will have size > 1
-  return (checkVec.size() > 1);
-
-}
-/*
-bool Statistics::CheckSingle (struct OrList *parseTree){
-	
 
 }*/
